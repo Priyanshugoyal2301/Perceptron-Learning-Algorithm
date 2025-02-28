@@ -1,0 +1,64 @@
+import numpy as np
+import matplotlib.pyplot as plt
+
+def perceptron_learning_algorithm(X, y, learning_rate=0.01, epochs=100):
+    """
+    Perceptron Learning Algorithm implementation.
+
+    Args:
+        X (numpy.ndarray): Input features (data points).
+        y (numpy.ndarray): Target labels (0 or 1).
+        learning_rate (float): Learning rate.
+        epochs (int): Number of training epochs.
+
+    Returns:
+        tuple: A tuple containing the final weights, bias, and a list of decision boundary history.
+    """
+    n_samples, n_features = X.shape
+    weights = np.zeros(n_features)
+    bias = 0
+    decision_boundary_history = []  # Store decision boundary for visualization
+
+    for _ in range(epochs):
+        for i in range(n_samples):
+            linear_output = np.dot(X[i], weights) + bias
+            prediction = 1 if linear_output > 0 else 0
+            update = learning_rate * (y[i] - prediction)
+            weights += update * X[i]
+            bias += update
+        decision_boundary_history.append((weights.copy(), bias))
+
+    return weights, bias, decision_boundary_history
+
+# Example usage:
+# Sample data (replace with your actual data)
+X = np.array([[1, 2], [2, 3], [3, 1], [4, 3], [5, 3], [6, 2]])
+y = np.array([0, 0, 0, 1, 1, 1])
+
+# Run the algorithm
+weights, bias, decision_boundary = perceptron_learning_algorithm(X, y)
+
+
+# Plot the final decision boundary
+plt.figure(figsize=(8, 6))
+x_values = np.linspace(min(X[:,0])-1, max(X[:,0])+1, 100)
+
+# To avoid division by zero, check if weights[1] != 0
+if weights[1] != 0:
+    y_values = -(weights[0] * x_values + bias) / weights[1]
+else:
+    vertical_x = -bias / weights[0] if weights[0] != 0 else 0
+    x_values = np.array([vertical_x, vertical_x])
+    y_values = np.array([min(X[:, 1]) - 1, max(X[:, 1]) + 1])
+
+plt.plot(x_values, y_values, label="Decision Boundary")
+plt.scatter(X[:, 0], X[:, 1], c=y, cmap='viridis', edgecolor='k')
+plt.xlabel("Feature 1")
+plt.ylabel("Feature 2")
+plt.title("Perceptron Decision Boundary")
+plt.legend()
+plt.show()
+
+
+print("Final weights:", weights)
+print("Final bias:", bias)
